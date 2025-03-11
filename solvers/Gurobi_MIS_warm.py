@@ -1,8 +1,9 @@
 import networkx as nx
 from gurobipy import Model, GRB, quicksum
 from lib.Solver import Solver
+import pandas as pd
 
-class GurobiMIS(Solver):
+class GurobiMIS_warm(Solver):
     """
     A solver class for finding the Maximum Independent Set (MIS) of a graph using the Gurobi optimization solver.
 
@@ -83,6 +84,12 @@ class GurobiMIS(Solver):
             if u != v:  # avoid adding a constraint for self-loops, if they exist
                 self.model.addConstr(node_vars[u] + node_vars[v] <= 1, f"edge_{u}_{v}")
 
+        # Initialize with intermediate values
+        df = pd.read_csv(f'./intermediate_results/{self.graph_name}.csv')
+        warm_start = df.values
+        for node in warm_start:
+            node_vars[int(node)].Start = 1 
+        
         # Set the objective: maximize the sum of the selected nodes
         self.model.setObjective(
             quicksum(node_vars[node] for node in self.G.nodes), GRB.MAXIMIZE

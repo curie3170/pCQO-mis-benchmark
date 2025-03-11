@@ -7,10 +7,18 @@ from datetime import datetime
 import logging
 import tqdm
 
-# from solvers.CPSAT_MIS import CPSATMIS
-# from solvers.Gurobi_MIS import GurobiMIS
 from solvers.pCQO_MIS import pCQOMIS_MGD
 # from solvers.KaMIS import ReduMIS
+from solvers.CPSAT_MIS import CPSATMIS
+from solvers.CPSAT_MIS_warm import CPSATMIS_warm
+from solvers.CPSAT_MIS_warm_full import CPSATMIS_warm_full
+from solvers.Gurobi_MIS import GurobiMIS
+from solvers.Gurobi_MIS_warm import GurobiMIS_warm
+from solvers.Gurobi_MIS_warm_full import GurobiMIS_warm_full
+import os
+os.environ["GUROBI_HOME"] = "/export2/curiekim/gurobi1200/linux64"
+os.environ["LD_LIBRARY_PATH"] = f"{os.environ.get('GUROBI_HOME')}/lib:" + os.environ.get("LD_LIBRARY_PATH", "")
+os.environ["GRB_LICENSE_FILE"] = "/export2/curiekim/gurobi.lic"
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='benchmark.log', level=logging.INFO, style="{")
@@ -21,11 +29,11 @@ SOLUTION_SAVE_INTERVAL = 1
 #### GRAPH IMPORT ####
 
 # List of directories containing graph data
-graph_directories = ["./graphs/gnm_random_graph_scalability/gnm_2000_999500",
-                    # "./graphs/gnm_random_graph_scalability/gnm_1500_562125",
-                    # "./graphs/gnm_random_graph_scalability/gnm_1000_249750",
-                    # "./graphs/gnm_random_graph_scalability/gnm_500_62375",
-                    # "./graphs/gnm_random_graph_scalability/gnm_50_613"
+graph_directories = [#"./graphs/gnm_random_graph_scalability/gnm_2000_999500",
+                    #"./graphs/gnm_random_graph_scalability/gnm_1500_562125",
+                    #"./graphs/gnm_random_graph_scalability/gnm_1000_249750",
+                    "./graphs/gnm_random_graph_scalability/gnm_500_62375",
+                    #"./graphs/gnm_random_graph_scalability/gnm_50_613"
                     ]
 
 # Initialize dataset and names lists
@@ -56,7 +64,7 @@ base_solvers = [
         "params": {
             "learning_rate": 0.01,
             "momentum": 0.55,
-            "number_of_steps": 10000,
+            "number_of_steps": 200, # 10000,
             "gamma": 100,
             "gamma_prime": 10,
             "batch_size": 2048,
@@ -67,7 +75,7 @@ base_solvers = [
             "value_initializer": "degree",
         },
     },
-    # {
+    # # {
     #     "name": "pCQO GNM 1500-2000 Scalability lr=0.009",
     #     "class": pCQOMIS_MGD,
     #     "params": {
@@ -86,7 +94,7 @@ base_solvers = [
     # },
     # {
     #     "name": "pCQO GNM 50-1000 Scalability",
-    #     "class": pCQOMIS_MGD,
+    #     "class": pCQOMIS_MGD,f
     #     "params": {
     #         "learning_rate": 0.01,
     #         "momentum": 0.55,
@@ -101,9 +109,13 @@ base_solvers = [
     #         "value_initializer": "degree",
     #     },
     # },
-    # {"name": "Gurobi", "class": GurobiMIS, "params": {}},
-    # {"name": "CPSAT", "class": CPSATMIS, "params": {}},
     # {"name": "ReduMIS", "class": ReduMIS, "params": {}},
+    {"name": "Gurobi", "class": GurobiMIS, "params": {"time_limit":300}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit":300}},
+    #{"name": "Gurobi_warm_full", "class": GurobiMIS_warm_full, "params": {"time_limit":30}},
+    #{"name": "CPSAT", "class": CPSATMIS, "params": {"time_limit":90}},
+    #{"name": "CPSATMIS_warm", "class": CPSATMIS_warm, "params": {"time_limit":90}},
+    #{"name": "CPSATMIS_warm_full", "class": CPSATMIS_warm_full, "params": {"time_limit":30}},
 ]
 
 # # List of solvers to be used in the benchmarking
@@ -157,16 +169,16 @@ def table_output(solutions, datasets, current_stage, total_stages):
 
             # Collect sizes and times for each solution
             table_row.extend([solution["data"]["size"] for solution in dataset_solutions])
-            table_row.extend([solution['data']['initializations_solved'] for solution in dataset_solutions])
+            #table_row.extend([solution["data"]["initializations_solved"] for solution in dataset_solutions])
             table_row.extend([solution["time_taken"] for solution in dataset_solutions])
 
             table_data.append(table_row)
-
+            
     # Generate headers for the CSV file
     table_headers = ["Dataset Name"]
     table_headers.extend([heading + " Solution Size" for heading in column_headings])
     # Uncomment to include headers for steps to solution size if available
-    table_headers.extend([heading + " # initializations_solved" for heading in column_headings])
+    #table_headers.extend([heading + " # initializations_solved" for heading in column_headings])
     table_headers.extend([heading + " Solution Time" for heading in column_headings])
 
     # Save the data to a CSV file
@@ -192,7 +204,7 @@ for graph_filename in tqdm.tqdm(graph_list, desc=" Iterating Through Graphs", po
 
     # Iterate over each solver
     for index, solver in enumerate(tqdm.tqdm(solvers,desc=" Iterating Solvers for Each Graph")):
-        solver_instance = solver["class"](dataset["graph"], solver["params"])
+        solver_instance = solver["class"](dataset["graph"], dataset["name"].split('/')[-1],solver["params"])
 
         # Solve the problem using the current solver
         solver_instance.solve()

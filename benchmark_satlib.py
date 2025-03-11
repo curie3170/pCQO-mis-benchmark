@@ -18,7 +18,6 @@ from solvers.Gurobi_MIS_warm_full import GurobiMIS_warm_full
 # from solvers.previous_work_MIS_dNNs import DNNMIS
 
 import os
-
 os.environ["GUROBI_HOME"] = "/export2/curiekim/gurobi1200/linux64"
 os.environ["LD_LIBRARY_PATH"] = f"{os.environ.get('GUROBI_HOME')}/lib:" + os.environ.get("LD_LIBRARY_PATH", "")
 os.environ["GRB_LICENSE_FILE"] = "/export2/curiekim/gurobi.lic"
@@ -35,11 +34,11 @@ SOLUTION_SAVE_INTERVAL = 1
 # List of directories containing graph data
 graph_directories = [
     ### ER 700-800 Graphs ###
-    "./graphs/er_700-800"
+    #"./graphs/er_700-800"
     ### GNM 300 Convergence Graphs ###
     # "./graphs/gnm_random_graph_convergence",
     ### SATLIB Graphs ###
-    #"./graphs/satlib/m403",
+    "./graphs/satlib/m403",
     #"./graphs/satlib/m411",
     # "./graphs/satlib/m418",
     # "./graphs/satlib/m423",
@@ -48,7 +47,7 @@ graph_directories = [
     # "./graphs/satlib/m441",
     # "./graphs/satlib/m449",
     ### ER density test Graphs ###
-    #"./graphs/er_05",
+    # "./graphs/er_05",
     # "./graphs/er_10",
     # "./graphs/er_15",
     # "./graphs/er_20"
@@ -68,7 +67,7 @@ base_solvers = [
         "params": {
             "learning_rate": 0.000009,
             "momentum": 0.9,
-            "number_of_steps": 225000,
+            "number_of_steps": 500,#225000,
             "gamma": 350,
             "gamma_prime": 7,
             "batch_size": 256,
@@ -77,8 +76,7 @@ base_solvers = [
             "steps_per_batch": 450,
             "output_interval": 225002,
             "value_initializer": "degree",
-            "checkpoints": [450] + list(range(4500, 225001, 450)),
-            "time_limit": 30,
+            "checkpoints": [450] + list(range(4500, 225001, 4500))
         },
     },
     # #Uncomment and configure the following solver for SATLIB datasets if needed
@@ -102,12 +100,12 @@ base_solvers = [
     #         "checkpoints": [30] + list(range(300,3300,300)),
     #     },
     # },
-    # {"name": "Gurobi", "class": GurobiMIS, "params": {"time_limit": 30}},
-    # {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30}},
-    # #{"name": "Gurobi_warm_full", "class": GurobiMIS_warm_full, "params": {"time_limit": 30}},
-    # {"name": "CPSAT", "class": CPSATMIS, "params": {"time_limit": 30}},
-    # {"name": "CPSATMIS_warm", "class": CPSATMIS_warm, "params": {"time_limit": 30}},
-    # #{"name": "CPSATMIS_warm_full", "class": CPSATMIS_warm_full, "params": {"time_limit": 30}},
+    {"name": "Gurobi", "class": GurobiMIS, "params": {"time_limit": 30}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30}},
+    {"name": "Gurobi_warm_full", "class": GurobiMIS_warm_full, "params": {"time_limit": 30}},
+    {"name": "CPSAT", "class": CPSATMIS, "params": {"time_limit": 30}},
+    {"name": "CPSATMIS_warm", "class": CPSATMIS_warm, "params": {"time_limit": 30}},
+    {"name": "CPSATMIS_warm_full", "class": CPSATMIS_warm_full, "params": {"time_limit": 30}},
 ]
 
 solvers = base_solvers

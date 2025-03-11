@@ -5,6 +5,7 @@ from networkx import Graph
 import time
 from lib.Solver import Solver
 import logging
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +114,7 @@ class pCQOMIS_MGD(Solver):
             - save_sample_path (bool, optional): Whether to save the sample path. Defaults to False.
     """
 
-    def __init__(self, G: Graph, params):
+    def __init__(self, G: Graph, G_name, params):
         """
         Initializes the pCQOMIS solver with the given graph and parameters.
 
@@ -126,6 +127,7 @@ class pCQOMIS_MGD(Solver):
         self.learning_rate = params.get("learning_rate", 0.001)
         self.number_of_steps = params.get("number_of_steps", 10000)
         self.graph = G
+        self.graph_name = G_name
         self.number_of_terms = params.get("number_of_terms", "three")
         self.gamma = params.get("gamma", 775)
         self.gamma_prime = params.get("gamma_prime", 1)
@@ -138,6 +140,7 @@ class pCQOMIS_MGD(Solver):
         self.solution = {}
         self.solutions = []
         self.checkpoints = params.get("checkpoints", [])
+        self.time_limit = params.get("time_limit", None)
         self.normalize = params.get("normalize", False)
         self.combine = params.get("combine", False)
         self.value_initializer = params.get("value_initializer", "random")
@@ -354,7 +357,7 @@ class pCQOMIS_MGD(Solver):
 
                 masks = masks.to(device)
                 indices_to_replace = []
-
+                
                 for batch_id, X_torch_binarized in enumerate(masks):
                     if X_torch_binarized.sum() != 0 and (X_torch_binarized.T @ adjacency_matrix_tensor @ X_torch_binarized) == 0:
                         # we have an IS. Next, we check if this IS is maximal based on the proof of the second theorem: Basically, we are checking if it is a local min based on the fixed point definition:
@@ -374,6 +377,9 @@ class pCQOMIS_MGD(Solver):
                                 best_MIS = len(MIS)
                                 MIS = MIS
                                 track_this = X_torch_binarized
+
+                                df = pd.DataFrame(MIS.cpu().numpy())
+                                df.to_csv(f'./intermediate_results/{self.graph_name}.csv', index=False, header=False) 
                 
                 if self.test_runtime:
                     torch.cuda.synchronize()
@@ -413,7 +419,15 @@ class pCQOMIS_MGD(Solver):
                     torch.cuda.synchronize()
                     restart_time = time.time()
                     restart_time_cum += restart_time - IS_check_time
-
+                if self.time_limit is not None:
+                    if self.time_limit < self.solution_time:
+                        self.solutions = [{
+                        "size": best_MIS,
+                        "number_of_steps": iteration_t+1,
+                        "steps_to_best_MIS": steps_to_best_MIS,
+                        "time": self.solution_time
+                        }]
+                        break
             if (iteration_t + 1) % self.output_interval == 0:
                 logger.info("Step %d/%d, IS: %s, lr: %s, MIS Size: %s", iteration_t + 1, number_of_iterations_T, MIS, learning_rate, best_MIS)
 

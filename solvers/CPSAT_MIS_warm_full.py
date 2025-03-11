@@ -3,6 +3,8 @@ import networkx as nx
 import numpy as np
 from lib.Solver import Solver
 import time
+import pandas as pd
+
 
 
 class VarArraySolutionPrinter(cp_model.CpSolverSolutionCallback):
@@ -69,7 +71,7 @@ class VarArraySolutionPrinter(cp_model.CpSolverSolutionCallback):
         return self._solution_count
 
 
-class CPSATMIS(Solver):
+class CPSATMIS_warm_full(Solver):
     """
     A solver class for finding the Maximum Independent Set (MIS) of a graph using
     the Google OR-Tools CP-SAT solver.
@@ -129,6 +131,13 @@ class CPSATMIS(Solver):
         for u, v in self.G.edges:
             model.Add(node_vars[u] + node_vars[v] <= 1)
 
+        df = pd.read_csv(f'./intermediate_results/{self.graph_name}.csv')
+        warm_start = df.values.astype(int).flatten().tolist()
+        for node in warm_start:
+            model.AddHint(node_vars[node], 1)
+        for node in node_vars.keys():
+            if node not in warm_start:
+                model.AddHint(node_vars[int(node)], 0)
         # Objective: Maximize the sum of the variables (maximize the size of the independent set)
         model.Maximize(sum(node_vars[node] for node in node_vars))
 
@@ -168,5 +177,5 @@ if __name__ == "__main__":
     params = {"time_limit": 10}  # 10 seconds time limit
 
     # Initialize and solve the MIS problem
-    solver = CPSATMIS(G, params)
+    solver = CPSATMIS_warm_full(G, None, params)
     solver.solve()
