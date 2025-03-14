@@ -5,8 +5,7 @@ from networkx import Graph
 import time
 from lib.Solver import Solver
 import logging
-import pandas as pd
-import os
+
 logger = logging.getLogger(__name__)
 
 
@@ -114,7 +113,7 @@ class pCQOMIS_MGD(Solver):
             - save_sample_path (bool, optional): Whether to save the sample path. Defaults to False.
     """
 
-    def __init__(self, G: Graph, G_name, params):
+    def __init__(self, G: Graph, params):
         """
         Initializes the pCQOMIS solver with the given graph and parameters.
 
@@ -127,7 +126,6 @@ class pCQOMIS_MGD(Solver):
         self.learning_rate = params.get("learning_rate", 0.001)
         self.number_of_steps = params.get("number_of_steps", 10000)
         self.graph = G
-        self.graph_name = G_name
         self.number_of_terms = params.get("number_of_terms", "three")
         self.gamma = params.get("gamma", 775)
         self.gamma_prime = params.get("gamma_prime", 1)
@@ -140,15 +138,12 @@ class pCQOMIS_MGD(Solver):
         self.solution = {}
         self.solutions = []
         self.checkpoints = params.get("checkpoints", [])
-        self.time_limit = params.get("time_limit", None)
-        self.dataset = params.get("dataset", None)
         self.normalize = params.get("normalize", False)
         self.combine = params.get("combine", False)
         self.value_initializer = params.get("value_initializer", "random")
         self.value_initializer_std = params.get("value_initializer_std", 2.25)
         self.test_runtime = params.get("test_runtime", False)
         self.save_sample_path = params.get("save_sample_path", False)
-        self.confidence_th = params.get("confidence_th", 0)
         self.momentum = params.get("momentum", 0.9)
         self.sample_previous_batch_best = params.get("sample_previous_batch_best", False)
 
@@ -282,8 +277,6 @@ class pCQOMIS_MGD(Solver):
 
         best_MIS = 0
         MIS = []
-        best_MIS_list = torch.empty(0).to(device)
-        best_MIS_masked = torch.empty(0).to(device)
 
         if self.save_sample_path:
             solution_path = []
@@ -348,7 +341,6 @@ class pCQOMIS_MGD(Solver):
                 velocity_update_time_cum += velocity_update_time - per_sample_gradient_time
 
             # Box-constraining:
-            Matrix_X_ori = Matrix_X
             Matrix_X = Matrix_X.clamp(min=0, max=1)
 
             if self.test_runtime:
@@ -362,7 +354,7 @@ class pCQOMIS_MGD(Solver):
 
                 masks = masks.to(device)
                 indices_to_replace = []
-                
+
                 for batch_id, X_torch_binarized in enumerate(masks):
                     if X_torch_binarized.sum() != 0 and (X_torch_binarized.T @ adjacency_matrix_tensor @ X_torch_binarized) == 0:
                         # we have an IS. Next, we check if this IS is maximal based on the proof of the second theorem: Basically, we are checking if it is a local min based on the fixed point definition:
@@ -381,23 +373,9 @@ class pCQOMIS_MGD(Solver):
                                 steps_to_best_MIS = iteration_t + 1
                                 best_MIS = len(MIS)
                                 MIS = MIS
-                                best_MIS_list = MIS
-                                confidence_mask = X_torch_binarized > self.confidence_th
-                                best_MIS_masked = torch.nonzero(X_torch_binarized * confidence_mask).squeeze()
+                                print(MIS)
                                 track_this = X_torch_binarized
-                   
-                                # df = pd.DataFrame(MIS.cpu().numpy())
-                                # df.to_csv(f'./intermediate_results/{self.graph_name}.csv', index=False, header=False) 
-
-                if self.dataset is not None:
-                    df = pd.DataFrame(best_MIS_list.cpu().numpy())
-                    dir_path = f'./intermediate_results/{self.dataset}'  
-                    os.makedirs(dir_path, exist_ok=True)
-                    df.to_csv(f'{dir_path}/{self.graph_name}_{iteration_t+1}.csv', index=False, header=False) 
-                    if self.confidence_th > 0:
-                        df2 = pd.DataFrame(best_MIS_masked.cpu().numpy())
-                        df2.to_csv(f'{dir_path}/{self.graph_name}_{iteration_t+1}_confidence{self.confidence_th}.csv', index=False, header=False) 
-                                    
+                
                 if self.test_runtime:
                     torch.cuda.synchronize()
                     IS_check_time = time.time()
@@ -413,10 +391,6 @@ class pCQOMIS_MGD(Solver):
                         "steps_to_best_MIS": steps_to_best_MIS,
                         "time": self.solution_time
                         })
-
-                    # else:
-                    #     os.makedirs(f'./intermediate_results', exist_ok=True)
-                    #     df.to_csv(f'./intermediate_results/{self.graph_name}.csv', index=False, header=False) 
                 if self.save_sample_path:
                     self._stop_timer()
                     solution_path.append(best_MIS)
@@ -440,16 +414,7 @@ class pCQOMIS_MGD(Solver):
                     torch.cuda.synchronize()
                     restart_time = time.time()
                     restart_time_cum += restart_time - IS_check_time
-                # Leave the best solution only when there's time_limit
-                if self.time_limit is not None:
-                    if self.time_limit < self.solution_time:
-                        self.solutions = [{
-                        "size": best_MIS,
-                        "number_of_steps": iteration_t+1,
-                        "steps_to_best_MIS": steps_to_best_MIS,
-                        "time": self.solution_time
-                        }]
-                        break
+
             if (iteration_t + 1) % self.output_interval == 0:
                 logger.info("Step %d/%d, IS: %s, lr: %s, MIS Size: %s", iteration_t + 1, number_of_iterations_T, MIS, learning_rate, best_MIS)
 

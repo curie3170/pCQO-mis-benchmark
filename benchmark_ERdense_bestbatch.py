@@ -7,11 +7,22 @@ import logging
 import tqdm
 
 from lib.dataset_generation import assemble_dataset_from_gpickle
-from solvers.pCQO_MIS_ori import pCQOMIS_MGD
+from solvers.pCQO_MIS import pCQOMIS_MGD
 # from solvers.CPSAT_MIS import CPSATMIS
-# from solvers.Gurobi_MIS import GurobiMIS
+# from solvers.CPSAT_MIS_warm import CPSATMIS_warm
+# from solvers.CPSAT_MIS_warm_full import CPSATMIS_warm_full
+from solvers.Gurobi_MIS import GurobiMIS
+from solvers.Gurobi_MIS_warm import GurobiMIS_warm
+# from solvers.Gurobi_MIS_warm_full import GurobiMIS_warm_full
 # from solvers.KaMIS import ReduMIS
 # from solvers.previous_work_MIS_dNNs import DNNMIS
+
+import os
+
+os.environ["GUROBI_HOME"] = "/export2/curiekim/gurobi1200/linux64"
+os.environ["LD_LIBRARY_PATH"] = f"{os.environ.get('GUROBI_HOME')}/lib:" + os.environ.get("LD_LIBRARY_PATH", "")
+os.environ["GRB_LICENSE_FILE"] = "/export2/curiekim/gurobi.lic"
+
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(filename='benchmark.log', level=logging.INFO, style="{")
@@ -24,12 +35,12 @@ SOLUTION_SAVE_INTERVAL = 1
 # List of directories containing graph data
 graph_directories = [
     ### ER 700-800 Graphs ###
-    # "./graphs/er_700-800"
+    #"./graphs/er_700-800"
     ### GNM 300 Convergence Graphs ###
     # "./graphs/gnm_random_graph_convergence",
     ### SATLIB Graphs ###
-    # "./graphs/satlib/m403",
-    # "./graphs/satlib/m411",
+    #"./graphs/satlib/m403",
+    #"./graphs/satlib/m411",
     # "./graphs/satlib/m418",
     # "./graphs/satlib/m423",
     # "./graphs/satlib/m429",
@@ -50,10 +61,29 @@ dataset = assemble_dataset_from_gpickle(graph_directories)
 
 # Define solvers and their parameters
 base_solvers = [
-    # {"name": "Gurobi", "class": GurobiMIS, "params": {"time_limit": 30}},
-    # {"name": "CPSAT", "class": CPSATMIS, "params": {"time_limit": 30}},
-    # {"name": "ReduMIS", "class": ReduMIS, "params": {"time_limit":30}},
+    #{"name": "ReduMIS", "class": ReduMIS, "params": {"time_limit":30}},
     {
+        "name": "pCQO_MIS ER 700-800 MGD",
+        "class": pCQOMIS_MGD,
+        "params": {
+            "learning_rate": 0.000009,
+            "momentum": 0.9,
+            "number_of_steps": 450, #225000,
+            "gamma": 350,
+            "gamma_prime": 7,
+            "batch_size": 256,
+            "std": 2.25,
+            "threshold": 0.00,
+            "steps_per_batch": 450,
+            "output_interval": 225002,
+            "value_initializer": "degree",
+            "checkpoints": [450] + list(range(4500, 225001, 4500)),
+            #"time_limit": 30,
+            "dataset": "er_dense_450step_bestbatch", #er_700-800 #er_dense
+            #"confidence_th": 0
+        },
+    },
+        {
         "name": "pCQO_MIS ER 700-800 MGD",
         "class": pCQOMIS_MGD,
         "params": {
@@ -68,30 +98,14 @@ base_solvers = [
             "steps_per_batch": 450,
             "output_interval": 225002,
             "value_initializer": "degree",
-            "checkpoints": [450] + list(range(4500, 225001, 4500))
+            "checkpoints": [450] + list(range(4500, 225001, 4500)),
+            "time_limit": 30,
+            "dataset": "er_dense_30sec_bestbatch", #er_700-800 #er_dense
+            #"confidence_th": 0
         },
-    },
-    # Uncomment and configure the following solver for SATLIB datasets if needed
-    # {
-    #     "name": "pCQO_MIS SATLIB MGD",
-    #     "class": pCQOMIS_MGD,
-    #     "params": {
-    #         "learning_rate": 0.0003,
-    #         "momentum": 0.875,
-    #         "number_of_steps": 3000,
-    #         "gamma": 900,
-    #         "gamma_prime": 1,
-    #         "batch_size": 256,
-    #         "std": 2.25,
-    #         "threshold": 0.00,
-    #         "steps_per_batch": 30,
-    #         "output_interval": 10000,
-    #         "value_initializer": "degree",
-    #         "number_of_terms": "three",
-    #         "sample_previous_batch_best": True,
-    #         "checkpoints": [30] + list(range(300,3300,300)),
-    #     },
-    # }
+    },    
+    {"name": "Gurobi", "class": GurobiMIS, "params": {"time_limit": 30,}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450}},
 ]
 
 solvers = base_solvers
@@ -176,7 +190,8 @@ stages = len(solvers) * len(dataset)
 # Iterate over each graph in the dataset
 for graph in tqdm.tqdm(dataset, desc=" Iterating Through Graphs", position=0):
     for solver in tqdm.tqdm(solvers, desc=" Iterating Solvers for Each Graph"):
-        solver_instance = solver["class"](graph["data"], solver["params"])
+        solver_instance = solver["class"](graph["data"], graph["name"], solver["params"])
+        #solver_instance = solver["class"](graph["data"], solver["params"])
 
         # Solve the problem using the current solver
         solver_instance.solve()

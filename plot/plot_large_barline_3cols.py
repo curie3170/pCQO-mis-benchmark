@@ -3,14 +3,15 @@ import matplotlib.pyplot as plt
 import os
 os.environ['MPLCONFIGDIR'] = '/tmp'
 
-file_path ='/export2/curiekim/pCQO-mis-benchmark/meaningful_results/zero_to_stage_25_of_25_total_stages_2025-03-11 14:58:06.677866_30sec.csv'
+file_path ='/export2/curiekim/pCQO-mis-benchmark/meaningful_results/zero_to_stage_15_of_15_total_stages_2025-03-11 16:11:01.049053_90sec.csv'
+file_path= '/export2/curiekim/pCQO-mis-benchmark/meaningful_results/zero_to_stage_384_of_384_total_stages_2025-03-13 19:16:45.033043_ER700800bestbatch.csv'
 df = pd.read_csv(file_path)
 
-selected_columns = df.iloc[:, 2:7]
+selected_columns = df.iloc[:, 2:5]
 mean_values = selected_columns.mean()
-custom_labels = ['pCQO-MIS', 'Gurobi', 'Gurobi_warmpart', 'CPSAT', 'CPSAT_warmpart ']
+custom_labels = ['pCQO-MIS', 'Gurobi', 'Gurobi_warmpart']
 
-runtime_columns = df.iloc[:, 7:12]
+runtime_columns = df.iloc[:, 5:8]
 runtime_means = runtime_columns.mean()
 
 plt.figure(figsize=(10, 6))
@@ -27,13 +28,15 @@ for i, txt in enumerate(runtime_means):
     plt.text(custom_labels[i], txt, f'{txt:.2f}', color='black', ha='center', va='bottom', fontsize=10)
 
 
-plt.title('Average MIS Values and Runtime of gnm_500_62375 dataset')
+#plt.title('Average MIS Values and Runtime of gnm_500_62375 dataset')
+plt.title('Average MIS Values and Runtime of ER_700_800 dataset')
 plt.xlabel('Methods')
 plt.ylabel('Average Values')
 plt.grid(axis='y', linestyle='--', alpha=0.7)
 plt.legend()
 plt.tight_layout()
 
-plt.savefig('large_graph_results_500.png')
+#plt.savefig('large_graph_results_500_90sec.png')
+plt.savefig('ER_700-800_bestbatch_results.png')
 
 plt.show()

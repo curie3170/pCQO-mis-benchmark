@@ -2,7 +2,7 @@ import networkx as nx
 from gurobipy import Model, GRB, quicksum
 from lib.Solver import Solver
 import pandas as pd
-
+import numpy as np
 class GurobiMIS_warm(Solver):
     """
     A solver class for finding the Maximum Independent Set (MIS) of a graph using the Gurobi optimization solver.
@@ -23,6 +23,10 @@ class GurobiMIS_warm(Solver):
         self.G = G
         self.graph_name = G_name
         self.time_limit = params.get("time_limit", None)
+        self.dataset = params.get("dataset", None)
+        self.iteration = params.get("iteration", None)
+        self.warm_sample_rate = params.get("warm_sample_rate", 1.0)
+        self.confidence_th = params.get("confidence_th", 0)
         self.solution = {}
         self.model = None
         self.solution_time = None  # Initialize solution_time
@@ -85,8 +89,17 @@ class GurobiMIS_warm(Solver):
                 self.model.addConstr(node_vars[u] + node_vars[v] <= 1, f"edge_{u}_{v}")
 
         # Initialize with intermediate values
-        df = pd.read_csv(f'./intermediate_results/{self.graph_name}.csv')
+        if (self.dataset is not None) and (self.iteration is not None) and (self.confidence_th > 0):
+            df = pd.read_csv(f'./intermediate_results/{self.dataset}/{self.graph_name}_{self.iteration}_confidence{self.confidence_th}.csv')
+        elif (self.dataset is not None) and (self.iteration is not None):
+            df = pd.read_csv(f'./intermediate_results/{self.dataset}/{self.graph_name}_{self.iteration}.csv')
+        elif (self.dataset is not None) and (self.iteration is None):
+            df = pd.read_csv(f'./intermediate_results/{self.dataset}/{self.graph_name}.csv')
+        else:
+            df = pd.read_csv(f'./intermediate_results/{self.graph_name}.csv')
         warm_start = df.values
+        sample_size = int(len(warm_start) * self.warm_sample_rate)
+        warm_start = warm_start[np.random.choice(len(warm_start), size=sample_size, replace=False)]
         for node in warm_start:
             node_vars[int(node)].Start = 1 
         
