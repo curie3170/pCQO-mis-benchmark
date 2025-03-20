@@ -8,12 +8,12 @@ import tqdm
 
 from lib.dataset_generation import assemble_dataset_from_gpickle
 from solvers.pCQO_MIS import pCQOMIS_MGD
-# from solvers.CPSAT_MIS import CPSATMIS
-# from solvers.CPSAT_MIS_warm import CPSATMIS_warm
-# from solvers.CPSAT_MIS_warm_full import CPSATMIS_warm_full
+from solvers.CPSAT_MIS import CPSATMIS
+from solvers.CPSAT_MIS_warm import CPSATMIS_warm
+from solvers.CPSAT_MIS_warm_full import CPSATMIS_warm_full
 from solvers.Gurobi_MIS import GurobiMIS
 from solvers.Gurobi_MIS_warm import GurobiMIS_warm
-# from solvers.Gurobi_MIS_warm_full import GurobiMIS_warm_full
+from solvers.Gurobi_MIS_warm_full import GurobiMIS_warm_full
 # from solvers.KaMIS import ReduMIS
 # from solvers.previous_work_MIS_dNNs import DNNMIS
 
@@ -35,7 +35,7 @@ SOLUTION_SAVE_INTERVAL = 1
 # List of directories containing graph data
 graph_directories = [
     ### ER 700-800 Graphs ###
-    #"./graphs/er_700-800"
+    "./graphs/er_700-800"
     ### GNM 300 Convergence Graphs ###
     # "./graphs/gnm_random_graph_convergence",
     ### SATLIB Graphs ###
@@ -48,10 +48,10 @@ graph_directories = [
     # "./graphs/satlib/m441",
     # "./graphs/satlib/m449",
     ### ER density test Graphs ###
-    "./graphs/er_05",
-    "./graphs/er_10",
-    "./graphs/er_15",
-    "./graphs/er_20"
+    # "./graphs/er_05",
+    # "./graphs/er_10",
+    # "./graphs/er_15",
+    # "./graphs/er_20"
 ]
 
 # Assemble dataset from .gpickle files in the specified directories
@@ -61,7 +61,40 @@ dataset = assemble_dataset_from_gpickle(graph_directories)
 
 # Define solvers and their parameters
 base_solvers = [
-    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.7}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 450, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 2250, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 4500, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 6750, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 9000, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 11250, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 13500, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 15750, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 18000, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 20250, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 22500, "warm_sample_rate": 0.2}},
+    
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 24750, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 27000, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 29250, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 31500, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 33750, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 36000, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 38250, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 40500, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 42750, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 45000, "warm_sample_rate": 0.2}},
+
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 47250, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 49500, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 51750, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 54000, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 56250, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 58500, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 60750, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 63000, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 65250, "warm_sample_rate": 0.2}},
+    {"name": "Gurobi_warm", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_bestbatch", "iteration": 67500, "warm_sample_rate": 0.2}},
+
 ]
 
 solvers = base_solvers
@@ -147,7 +180,6 @@ stages = len(solvers) * len(dataset)
 for graph in tqdm.tqdm(dataset, desc=" Iterating Through Graphs", position=0):
     for solver in tqdm.tqdm(solvers, desc=" Iterating Solvers for Each Graph"):
         solver_instance = solver["class"](graph["data"], graph["name"], solver["params"])
-        #solver_instance = solver["class"](graph["data"], solver["params"])
 
         # Solve the problem using the current solver
         solver_instance.solve()
@@ -162,7 +194,7 @@ for graph in tqdm.tqdm(dataset, desc=" Iterating Through Graphs", position=0):
                 solutions.append(pretty_solution)
         else:
             solution = {
-                "solution_method": f"{solver['name']} with random sample rate of {solver['params']['warm_sample_rate']}",
+                "solution_method": f'{solver["name"]} warm start at step {solver["params"]["iteration"]} with random sample rate of {solver["params"]["warm_sample_rate"]}',
                 "dataset_name": graph["name"],
                 "data": deepcopy(solver_instance.solution),
                 "time_taken": deepcopy(solver_instance.solution_time),

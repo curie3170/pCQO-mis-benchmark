@@ -61,7 +61,7 @@ dataset = assemble_dataset_from_gpickle(graph_directories)
 
 # Define solvers and their parameters
 base_solvers = [
-    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.3}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.7}},
 ]
 
 solvers = base_solvers
@@ -84,6 +84,7 @@ for solver in base_solvers:
                         modified_solver["params"]["gamma"] = gamma_gamma_prime[0]
                         modified_solver["params"]["gamma_prime"] = gamma_gamma_prime[1]
                         modified_solver["params"]["number_of_terms"] = terms
+                        modified_solver["params"]["batch_size"] = batch_size
                         modified_solver["params"]["batch_size"] = batch_size
                         solvers.append(modified_solver)
 
@@ -161,7 +162,7 @@ for graph in tqdm.tqdm(dataset, desc=" Iterating Through Graphs", position=0):
                 solutions.append(pretty_solution)
         else:
             solution = {
-                "solution_method": solver["name"],
+                "solution_method": f"{solver['name']} with random sample rate of {solver['params']['warm_sample_rate']}",
                 "dataset_name": graph["name"],
                 "data": deepcopy(solver_instance.solution),
                 "time_taken": deepcopy(solver_instance.solution_time),

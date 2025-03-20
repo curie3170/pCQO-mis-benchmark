@@ -7,11 +7,11 @@ import logging
 import tqdm
 
 from lib.dataset_generation import assemble_dataset_from_gpickle
-from solvers.pCQO_MIS import pCQOMIS_MGD
+#from solvers.pCQO_MIS import pCQOMIS_MGD
 # from solvers.CPSAT_MIS import CPSATMIS
 # from solvers.CPSAT_MIS_warm import CPSATMIS_warm
 # from solvers.CPSAT_MIS_warm_full import CPSATMIS_warm_full
-from solvers.Gurobi_MIS import GurobiMIS
+# from solvers.Gurobi_MIS import GurobiMIS
 from solvers.Gurobi_MIS_warm import GurobiMIS_warm
 # from solvers.Gurobi_MIS_warm_full import GurobiMIS_warm_full
 # from solvers.KaMIS import ReduMIS
@@ -35,7 +35,7 @@ SOLUTION_SAVE_INTERVAL = 1
 # List of directories containing graph data
 graph_directories = [
     ### ER 700-800 Graphs ###
-    #"./graphs/er_700-800"
+    "./graphs/er_700-800"
     ### GNM 300 Convergence Graphs ###
     # "./graphs/gnm_random_graph_convergence",
     ### SATLIB Graphs ###
@@ -48,10 +48,10 @@ graph_directories = [
     # "./graphs/satlib/m441",
     # "./graphs/satlib/m449",
     ### ER density test Graphs ###
-    "./graphs/er_05",
-    "./graphs/er_10",
-    "./graphs/er_15",
-    "./graphs/er_20"
+    # "./graphs/er_05",
+    # "./graphs/er_10",
+    # "./graphs/er_15",
+    # "./graphs/er_20"
 ]
 
 # Assemble dataset from .gpickle files in the specified directories
@@ -61,7 +61,16 @@ dataset = assemble_dataset_from_gpickle(graph_directories)
 
 # Define solvers and their parameters
 base_solvers = [
-    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.7}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.05}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.05}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.05}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.05}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.05}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.05}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.05}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.05}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.05}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_700-800_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.05}},
 ]
 
 solvers = base_solvers
@@ -84,6 +93,7 @@ for solver in base_solvers:
                         modified_solver["params"]["gamma"] = gamma_gamma_prime[0]
                         modified_solver["params"]["gamma_prime"] = gamma_gamma_prime[1]
                         modified_solver["params"]["number_of_terms"] = terms
+                        modified_solver["params"]["batch_size"] = batch_size
                         modified_solver["params"]["batch_size"] = batch_size
                         solvers.append(modified_solver)
 
@@ -147,7 +157,6 @@ stages = len(solvers) * len(dataset)
 for graph in tqdm.tqdm(dataset, desc=" Iterating Through Graphs", position=0):
     for solver in tqdm.tqdm(solvers, desc=" Iterating Solvers for Each Graph"):
         solver_instance = solver["class"](graph["data"], graph["name"], solver["params"])
-        #solver_instance = solver["class"](graph["data"], solver["params"])
 
         # Solve the problem using the current solver
         solver_instance.solve()

@@ -348,7 +348,10 @@ class pCQOMIS_MGD(Solver):
                 velocity_update_time_cum += velocity_update_time - per_sample_gradient_time
 
             # Box-constraining:
-            Matrix_X_ori = Matrix_X
+
+            Matrix_X_pos = Matrix_X.clamp(min=0).to(torch.float32)
+            confidence = torch.quantile(Matrix_X_pos[Matrix_X_pos>0], self.confidence_th)
+            confidence_mask = Matrix_X >= confidence
             Matrix_X = Matrix_X.clamp(min=0, max=1)
 
             if self.test_runtime:
@@ -382,12 +385,15 @@ class pCQOMIS_MGD(Solver):
                                 best_MIS = len(MIS)
                                 MIS = MIS
                                 best_MIS_list = MIS
-                                confidence_mask = X_torch_binarized > self.confidence_th
-                                best_MIS_masked = torch.nonzero(X_torch_binarized * confidence_mask).squeeze()
+                                best_MIS_masked = torch.nonzero(X_torch_binarized * confidence_mask[batch_id]).squeeze()
+                                if not torch.equal(best_MIS_list, best_MIS_masked):
+                                    continue
                                 track_this = X_torch_binarized
-                   
-                                # df = pd.DataFrame(MIS.cpu().numpy())
-                                # df.to_csv(f'./intermediate_results/{self.graph_name}.csv', index=False, header=False) 
+                    if self.time_limit is not None:
+                        self._stop_timer()
+                        if self.time_limit < self.solution_time: #batch break
+                            break
+
 
                 if self.dataset is not None:
                     df = pd.DataFrame(best_MIS_list.cpu().numpy())

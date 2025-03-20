@@ -61,7 +61,16 @@ dataset = assemble_dataset_from_gpickle(graph_directories)
 
 # Define solvers and their parameters
 base_solvers = [
-    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.7}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.3}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.3}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.3}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.3}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.3}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.3}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.3}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.3}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.3}},
+    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.3}},
 ]
 
 solvers = base_solvers

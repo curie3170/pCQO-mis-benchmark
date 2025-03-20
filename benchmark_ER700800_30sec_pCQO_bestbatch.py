@@ -8,12 +8,12 @@ import tqdm
 
 from lib.dataset_generation import assemble_dataset_from_gpickle
 from solvers.pCQO_MIS import pCQOMIS_MGD
-# from solvers.CPSAT_MIS import CPSATMIS
-# from solvers.CPSAT_MIS_warm import CPSATMIS_warm
-# from solvers.CPSAT_MIS_warm_full import CPSATMIS_warm_full
+from solvers.CPSAT_MIS import CPSATMIS
+from solvers.CPSAT_MIS_warm import CPSATMIS_warm
+from solvers.CPSAT_MIS_warm_full import CPSATMIS_warm_full
 from solvers.Gurobi_MIS import GurobiMIS
 from solvers.Gurobi_MIS_warm import GurobiMIS_warm
-# from solvers.Gurobi_MIS_warm_full import GurobiMIS_warm_full
+from solvers.Gurobi_MIS_warm_full import GurobiMIS_warm_full
 # from solvers.KaMIS import ReduMIS
 # from solvers.previous_work_MIS_dNNs import DNNMIS
 
@@ -35,7 +35,7 @@ SOLUTION_SAVE_INTERVAL = 1
 # List of directories containing graph data
 graph_directories = [
     ### ER 700-800 Graphs ###
-    #"./graphs/er_700-800"
+    "./graphs/er_700-800"
     ### GNM 300 Convergence Graphs ###
     # "./graphs/gnm_random_graph_convergence",
     ### SATLIB Graphs ###
@@ -48,10 +48,10 @@ graph_directories = [
     # "./graphs/satlib/m441",
     # "./graphs/satlib/m449",
     ### ER density test Graphs ###
-    "./graphs/er_05",
-    "./graphs/er_10",
-    "./graphs/er_15",
-    "./graphs/er_20"
+    # "./graphs/er_05",
+    # "./graphs/er_10",
+    # "./graphs/er_15",
+    # "./graphs/er_20"
 ]
 
 # Assemble dataset from .gpickle files in the specified directories
@@ -61,7 +61,27 @@ dataset = assemble_dataset_from_gpickle(graph_directories)
 
 # Define solvers and their parameters
 base_solvers = [
-    {"name": "Gurobi_warm_rand", "class": GurobiMIS_warm, "params": {"time_limit": 30, "dataset": "er_dense_450step_bestbatch", "iteration": 450, "warm_sample_rate": 0.7}},
+    #{"name": "ReduMIS", "class": ReduMIS, "params": {"time_limit":30}},
+    {
+        "name": "pCQO_MIS ER 700-800 MGD",
+        "class": pCQOMIS_MGD,
+        "params": {
+            "learning_rate": 0.000009,
+            "momentum": 0.9,
+            "number_of_steps": 225000,
+            "gamma": 350,
+            "gamma_prime": 7,
+            "batch_size": 256,
+            "std": 2.25,
+            "threshold": 0.00,
+            "steps_per_batch": 450,
+            "output_interval": 225002,
+            "value_initializer": "degree",
+            "checkpoints": [450] + list(range(4500, 225001, 4500)),
+            "time_limit": 30,
+            "dataset": "er_700-800_30sec_bestbatch2", #er_700-800 #er_dense
+        },
+    },
 ]
 
 solvers = base_solvers
@@ -147,7 +167,6 @@ stages = len(solvers) * len(dataset)
 for graph in tqdm.tqdm(dataset, desc=" Iterating Through Graphs", position=0):
     for solver in tqdm.tqdm(solvers, desc=" Iterating Solvers for Each Graph"):
         solver_instance = solver["class"](graph["data"], graph["name"], solver["params"])
-        #solver_instance = solver["class"](graph["data"], solver["params"])
 
         # Solve the problem using the current solver
         solver_instance.solve()
@@ -162,7 +181,7 @@ for graph in tqdm.tqdm(dataset, desc=" Iterating Through Graphs", position=0):
                 solutions.append(pretty_solution)
         else:
             solution = {
-                "solution_method": f"{solver['name']} with random sample rate of {solver['params']['warm_sample_rate']}",
+                "solution_method": solver["name"],
                 "dataset_name": graph["name"],
                 "data": deepcopy(solver_instance.solution),
                 "time_taken": deepcopy(solver_instance.solution_time),

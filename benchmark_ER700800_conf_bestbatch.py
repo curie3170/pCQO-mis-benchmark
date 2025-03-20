@@ -7,12 +7,12 @@ import logging
 import tqdm
 
 from lib.dataset_generation import assemble_dataset_from_gpickle
-#from solvers.pCQO_MIS import pCQOMIS_MGD
+from solvers.pCQO_MIS import pCQOMIS_MGD
 # from solvers.CPSAT_MIS import CPSATMIS
 # from solvers.CPSAT_MIS_warm import CPSATMIS_warm
 # from solvers.CPSAT_MIS_warm_full import CPSATMIS_warm_full
 # from solvers.Gurobi_MIS import GurobiMIS
-from solvers.Gurobi_MIS_warm import GurobiMIS_warm
+#from solvers.Gurobi_MIS_warm import GurobiMIS_warm
 # from solvers.Gurobi_MIS_warm_full import GurobiMIS_warm_full
 # from solvers.KaMIS import ReduMIS
 # from solvers.previous_work_MIS_dNNs import DNNMIS
@@ -78,7 +78,7 @@ base_solvers = [
             "value_initializer": "degree",
             "checkpoints": [450] + list(range(4500, 225001, 4500)),
             "dataset": "er_700-800_450step_bestbatch", #er_700-800 #er_dense
-            "confidence_th": 0.9
+            "confidence_th": 0.2
         },
     },
 ]
