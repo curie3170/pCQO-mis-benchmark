@@ -93,6 +93,8 @@ class CPSATMIS_warm(Solver):
         self.G = G
         self.graph_name = G_name
         self.time_limit = params.get("time_limit", None)
+        self.dataset = params.get("dataset", None)
+        self.iteration = params.get("iteration", None)
         self.solution = {}
         self.solution_time = None
         self.print_intermediate = True
@@ -131,7 +133,13 @@ class CPSATMIS_warm(Solver):
         for u, v in self.G.edges:
             model.Add(node_vars[u] + node_vars[v] <= 1)
 
-        df = pd.read_csv(f'./intermediate_results/{self.graph_name}.csv')
+        # Initialize with intermediate values
+        if (self.dataset is not None) and (self.iteration is not None):
+            df = pd.read_csv(f'./intermediate_results/{self.dataset}/{self.graph_name}_{self.iteration}.csv')
+        elif (self.dataset is not None) and (self.iteration is None):
+            df = pd.read_csv(f'./intermediate_results/{self.dataset}/{self.graph_name}.csv')
+        else:
+            df = pd.read_csv(f'./intermediate_results/{self.graph_name}.csv')
         warm_start = df.values
         for node in warm_start:
             model.AddHint(node_vars[int(node)], 1)

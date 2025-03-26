@@ -1,0 +1,6 @@
+,Dataset Name,pCQO GNM 1500-2000 Scalability Solution Size,Gurobi Solution Size,Gurobi_warm Solution Size,pCQO GNM 1500-2000 Scalability Solution Time,Gurobi Solution Time,Gurobi_warm Solution Time
+0,./graphs/gnm_random_graph_scalability/gnm_500_62375/GNM_500_62375_4,13,13,13,3.675394058227539,90.03090381622314,90.03417301177979
+1,./graphs/gnm_random_graph_scalability/gnm_500_62375/GNM_500_62375_2,13,14,13,2.804560422897339,90.02986407279968,90.03106689453125
+2,./graphs/gnm_random_graph_scalability/gnm_500_62375/GNM_500_62375_3,12,12,13,3.111588954925537,90.03924083709717,90.02641987800598
+3,./graphs/gnm_random_graph_scalability/gnm_500_62375/GNM_500_62375_1,13,13,13,3.2538015842437744,90.04721117019653,90.04260897636414
+4,./graphs/gnm_random_graph_scalability/gnm_500_62375/GNM_500_62375_0,13,13,13,3.3375844955444336,90.03608393669128,90.03009104728699

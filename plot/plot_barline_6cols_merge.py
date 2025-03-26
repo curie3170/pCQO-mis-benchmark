@@ -7,7 +7,9 @@ os.environ['MPLCONFIGDIR'] = '/tmp'
 file_path1 = '/export2/curiekim/pCQO-mis-benchmark/meaningful_results/zero_to_stage_512_of_512_total_stages_2025-03-14 16:26:54.368642_ER700800_bestbatch.csv'
 file_path2 = '/export2/curiekim/pCQO-mis-benchmark/meaningful_results/zero_to_stage_128_of_128_total_stages_2025-03-14 14:22:09.914384_ER700800_rand0.3_bestbatch.csv'
 file_path3 = '/export2/curiekim/pCQO-mis-benchmark/meaningful_results/zero_to_stage_128_of_128_total_stages_2025-03-14 15:47:08.712226_ER700800_rand0.5_bestbatch.csv'
-
+file_path2 = '/export2/curiekim/pCQO-mis-benchmark/meaningful_results/zero_to_stage_128_of_128_total_stages_2025-03-22 18:55:09.318783_CPSAT_bestbatch.csv'
+file_path3 = '/export2/curiekim/pCQO-mis-benchmark/meaningful_results/zero_to_stage_128_of_128_total_stages_2025-03-22 18:53:03.892907_CPSAT_warm_bestbatch.csv'
+file_path4 = '/export2/curiekim/pCQO-mis-benchmark/meaningful_results/zero_to_stage_128_of_128_total_stages_2025-03-18 17:18:29.908438_ER700800_pCQO30sec_bestbatch.csv'
 # file_path1 = '/export2/curiekim/pCQO-mis-benchmark/meaningful_results/zero_to_stage_512_of_512_total_stages_2025-03-14 16:26:21.973541_ERdense_bestbatch.csv'
 # file_path2 = '/export2/curiekim/pCQO-mis-benchmark/meaningful_results/zero_to_stage_128_of_128_total_stages_2025-03-14 14:26:05.814101_ERdense_rand0.3_bestbatch.csv'
 # file_path3 = '/export2/curiekim/pCQO-mis-benchmark/meaningful_results/zero_to_stage_128_of_128_total_stages_2025-03-14 15:52:28.873645_ERdense_rand0.5_bestbatch.csv'
@@ -15,9 +17,15 @@ file_path3 = '/export2/curiekim/pCQO-mis-benchmark/meaningful_results/zero_to_st
 df1 = pd.read_csv(file_path1)
 df2 = pd.read_csv(file_path2)
 df3 = pd.read_csv(file_path3)
+df4 = pd.read_csv(file_path4)
 
-selected_columns = df1.iloc[:, 2:6].copy()
-runtime_columns = df1.iloc[:, 6:10].copy()
+# selected_columns = df1.iloc[:, 2:6].copy()
+# runtime_columns = df1.iloc[:, 6:10].copy()
+selected_columns = df1.iloc[:, [2, 4, 5]].copy()
+selected_columns.insert(1, 'pCQO-MIS_30s', df4.iloc[:, 2].values) #new pCQO_30s
+runtime_columns = df1.iloc[:, [6, 8, 9]].copy()
+runtime_columns.insert(1, 'pCQO-MIS_30s_runtime', df4.iloc[:, 3].values)
+
 
 selected_columns.insert(4, 'Gurobi_warm_0.3', df2.iloc[:, 2])
 runtime_columns.insert(4, 'Gurobi_warm_0.3_runtime', df2.iloc[:, 3])
@@ -28,7 +36,7 @@ runtime_columns.insert(5, 'Gurobi_warm_0.5_runtime', df3.iloc[:, 3])
 mean_values = selected_columns.mean()
 runtime_means = runtime_columns.mean()
 
-custom_labels = ['pCQO-MIS', 'pCQO-MIS_30s', 'Gurobi', 'Gurobi_warm', 'Gurobi_warm_0.3', 'Gurobi_warm_0.5']
+custom_labels = ['pCQO-MIS', 'pCQO-MIS_30s', 'Gurobi', 'Gurobi_warm', 'CPSAT', 'CPSAT_warm']
 
 plt.figure(figsize=(10, 6))
 
